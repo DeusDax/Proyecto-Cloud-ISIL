@@ -166,7 +166,8 @@ app.post('/api/auth/login', (req, res) => {
   const safeUser = { id: user.id, nombre: user.nombre, username: user.username, role: user.role };
   sessions.set(token, { user: safeUser, expiresAt: Date.now() + SESSION_TTL_MS });
   saveSessions();
-  const secureCookie = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  const forwardedProtocol = String(req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const secureCookie = req.secure || forwardedProtocol === 'https' ? '; Secure' : '';
   res.setHeader('Set-Cookie', `${SESSION_COOKIE}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_TTL_MS / 1000}${secureCookie}`);
   res.json({ user: safeUser, redirect: user.role === 'admin' ? '/admin' : '/mi-cuenta' });
 });
