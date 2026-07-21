@@ -1,23 +1,36 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Infraestructura EC2 basica para Tactical Support Cloud
+Description: Tactical Support Cloud en EC2 con Node.js, NGINX y systemd
+
 Parameters:
   KeyName:
-    Description: Nombre del par de claves EC2 para acceso SSH
+    Description: Par de claves EC2 para acceso SSH
     Type: AWS::EC2::KeyPair::KeyName
   AdminCidr:
-    Description: Red publica autorizada para SSH en formato CIDR (ejemplo 203.0.113.10/32)
+    Description: IP publica autorizada para SSH (ejemplo 203.0.113.10/32)
     Type: String
     AllowedPattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:[0-9]|[12][0-9]|3[0-2])$'
     ConstraintDescription: Debe ingresar una direccion IPv4 con prefijo CIDR.
+  InstanceType:
+    Description: Tipo de instancia EC2
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+  RepositoryUrl:
+    Description: Repositorio publico que contiene la aplicacion
+    Type: String
+    Default: https://github.com/DeusDax/Proyecto-Cloud-ISIL.git
   LatestAmiId:
-    Description: AMI Amazon Linux 2023 por SSM Parameter
+    Description: Amazon Linux 2023 obtenido desde SSM
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
 Resources:
   TacticalSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permite HTTP publico y SSH restringido manualmente
+      GroupDescription: HTTP publico y SSH limitado al administrador
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -30,21 +43,112 @@ Resources:
       Tags:
         - Key: Name
           Value: tactical-support-sg
+
   TacticalInstance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref LatestAmiId
-      InstanceType: t2.micro
+      InstanceType: !Ref InstanceType
       KeyName: !Ref KeyName
       SecurityGroupIds:
-        - !Ref TacticalSecurityGroup
+        - !GetAtt TacticalSecurityGroup.GroupId
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 12
+            VolumeType: gp3
+            Encrypted: true
+            DeleteOnTermination: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+          exec > >(tee /var/log/tactical-install.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+          dnf update -y
+          dnf install -y git nginx nodejs22 nodejs22-npm
+          alternatives --set node /usr/bin/node-22
+          alternatives --set npm /usr/bin/npm-22
+
+          rm -rf /opt/proyecto-cloud-isil
+          git clone ${RepositoryUrl} /opt/proyecto-cloud-isil
+          cd /opt/proyecto-cloud-isil/tactical-support-cloud
+          npm ci --omit=dev
+          chown -R ec2-user:ec2-user /opt/proyecto-cloud-isil
+
+          cat > /etc/systemd/system/tactical-support-cloud.service <<'SERVICE'
+          [Unit]
+          Description=Tactical Support Cloud
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=ec2-user
+          Group=ec2-user
+          WorkingDirectory=/opt/proyecto-cloud-isil/tactical-support-cloud
+          Environment=NODE_ENV=production
+          Environment=PORT=3000
+          ExecStart=/usr/bin/node server.js
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+          SERVICE
+
+          cat > /etc/nginx/nginx.conf <<'NGINX'
+          user nginx;
+          worker_processes auto;
+          error_log /var/log/nginx/error.log notice;
+          pid /run/nginx.pid;
+
+          events {
+              worker_connections 1024;
+          }
+
+          http {
+              include /etc/nginx/mime.types;
+              default_type application/octet-stream;
+              sendfile on;
+              keepalive_timeout 65;
+
+              server {
+                  listen 80 default_server;
+                  server_name _;
+
+                  location / {
+                      proxy_pass http://127.0.0.1:3000;
+                      proxy_http_version 1.1;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                  }
+              }
+          }
+          NGINX
+
+          systemctl daemon-reload
+          systemctl enable --now tactical-support-cloud
+          nginx -t
+          systemctl enable --now nginx
+          curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:3000/api/health
       Tags:
         - Key: Name
           Value: tactical-support-cloud
+        - Key: Project
+          Value: Proyecto Cloud ISIL
+
 Outputs:
+  InstanceId:
+    Description: ID de la instancia EC2
+    Value: !Ref TacticalInstance
   PublicIP:
-    Description: IP publica de la instancia EC2
+    Description: IP publica de la instancia
     Value: !GetAtt TacticalInstance.PublicIp
   WebURL:
-    Description: URL de prueba
-    Value: !Sub 'http://${TacticalInstance.PublicIp}'
+    Description: URL publica de Tactical Support Cloud
+    Value: !Sub 'http://${TacticalInstance.PublicDnsName}'
+  SSHCommand:
+    Description: Comando SSH de referencia para Amazon Linux
+    Value: !Sub 'ssh -i TU-CLAVE.pem ec2-user@${TacticalInstance.PublicDnsName}'

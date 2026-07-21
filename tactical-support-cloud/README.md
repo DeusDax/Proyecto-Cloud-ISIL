@@ -96,11 +96,15 @@ Para producción se recomienda usar HTTPS, establecer cookies `Secure`, añadir 
 
 ## Despliegue en EC2
 
-La plantilla usa Amazon Linux 2023. El script de instalación detecta distribuciones basadas en `dnf` o `apt`, instala Node.js, NGINX, Git y PM2, y activa NGINX.
+La plantilla usa Amazon Linux 2023 y realiza el despliegue automático mediante EC2 User Data. Instala Node.js 22, NGINX y Git; clona este repositorio, ejecuta `npm ci`, registra la aplicación como servicio de `systemd` y configura NGINX como proxy hacia el puerto interno 3000.
 
 Al crear el stack se solicitan:
 
 - `KeyName`: par de claves de EC2.
 - `AdminCidr`: IP pública administrativa con `/32`, por ejemplo `203.0.113.10/32`.
+- `InstanceType`: `t3.micro` por defecto.
+- `RepositoryUrl`: repositorio público desde el que se descarga la aplicación.
+
+El Security Group publica únicamente HTTP en el puerto 80 y restringe SSH a `AdminCidr`. El puerto 3000 no se expone a Internet. El proceso se reinicia automáticamente mediante `systemd` y los registros de instalación quedan en `/var/log/tactical-install.log`.
 
 No se deben guardar credenciales de AWS dentro del repositorio.
