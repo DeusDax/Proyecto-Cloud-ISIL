@@ -207,12 +207,11 @@ Resources:
           dnf update -y
           dnf install -y git nginx nodejs22 nodejs22-npm amazon-cloudwatch-agent
           alternatives --set node /usr/bin/node-22
-          alternatives --set npm /usr/bin/npm-22
 
           rm -rf /opt/proyecto-cloud-isil
           git clone ${RepositoryUrl} /opt/proyecto-cloud-isil
           cd /opt/proyecto-cloud-isil/tactical-support-cloud
-          npm ci --omit=dev
+          npm ci --omit=dev --no-audit --no-fund
           chown -R ec2-user:ec2-user /opt/proyecto-cloud-isil
           touch /var/log/tactical-app.log
           chown ec2-user:ec2-user /var/log/tactical-app.log
