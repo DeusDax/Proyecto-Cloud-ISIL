@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tactical Support Cloud | Mesa de Ayuda</title>
+  <meta name="description" content="Portal de soporte cloud para registrar, consultar y controlar solicitudes de soporte técnico de Tactical IT S.A.C." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Tactical Support Cloud">
+      <img class="brand-logo" src="assets/tactical-logo.png" alt="Tactical IT — Tecnología que transforma" />
+    </a>
+    <nav class="nav">
+      <a href="#problema">Beneficios</a>
+      <a href="#solucion">Cómo funciona</a>
+      <a href="#ticket">Crear ticket</a>
+      <a href="#consulta">Consultar</a>
+      <a id="accountLink" href="/acceso.html">Acceso</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero section-grid">
+      <div class="hero-content">
+        <span class="eyebrow">Mesa de ayuda para servicios tecnológicos</span>
+        <h1>Portal cloud para registrar y controlar solicitudes de soporte.</h1>
+        <p>
+          Registra tus solicitudes técnicas, consulta su avance y mantén comunicación clara con nuestro
+          equipo de soporte desde un único portal.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#ticket">Registrar solicitud</a>
+          <a id="sessionButton" class="btn secondary" href="/acceso.html">Iniciar sesión</a>
+        </div>
+        <div class="trust-row" aria-label="Indicadores del servicio">
+          <div><strong>24/7</strong><span>Enfoque NOC/SOC</span></div>
+          <div><strong>SLA</strong><span>Priorización por criticidad</span></div>
+          <div><strong>Seguro</strong><span>Protección y monitoreo</span></div>
+        </div>
+      </div>
+      <div class="hero-card glass-card">
+        <div class="status-header">
+          <span class="pulse"></span>
+          <strong>Estado del servicio</strong>
+          <small>Operativo</small>
+        </div>
+        <div class="metric-stack">
+          <div class="metric-item">
+            <span>Canal de atención</span>
+            <strong>En línea</strong>
+          </div>
+          <div class="metric-item">
+            <span>Seguimiento</span>
+            <strong>Continuo</strong>
+          </div>
+          <div class="metric-item">
+            <span>Disponibilidad objetivo</span>
+            <strong>99.9%</strong>
+          </div>
+        </div>
+        <div class="mini-flow">
+          <span>Cliente</span>
+          <i></i>
+          <span>Ticket</span>
+          <i></i>
+          <span>Soporte</span>
+          <i></i>
+          <span>SLA</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="problema" class="section">
+      <div class="section-title">
+        <span class="eyebrow">Atención centralizada</span>
+        <h2>Todo lo que necesitas para gestionar tu soporte</h2>
+        <p>Una experiencia simple y transparente para registrar incidencias y conocer su avance en todo momento.</p>
+      </div>
+      <div class="cards three">
+        <article class="card warning">
+          <span class="icon">☎</span>
+          <h3>Registro inmediato</h3>
+          <p>Crea una solicitud con todos los datos necesarios y recibe un código único para su seguimiento.</p>
+        </article>
+        <article class="card warning">
+          <span class="icon">⏱</span>
+          <h3>Atención priorizada</h3>
+          <p>Cada caso se clasifica según su impacto para asignar el nivel de atención correspondiente.</p>
+        </article>
+        <article class="card warning">
+          <span class="icon">📉</span>
+          <h3>Seguimiento continuo</h3>
+          <p>Consulta el estado de tu solicitud y conoce el progreso de la atención desde un solo lugar.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="solucion" class="section split">
+      <div>
+        <span class="eyebrow">Nuestro servicio</span>
+        <h2>Soporte técnico conectado contigo</h2>
+        <p>
+          Nuestro portal reúne el registro, la priorización y el seguimiento de tus solicitudes para ofrecerte
+          una atención organizada, segura y oportuna.
+        </p>
+        <ul class="check-list">
+          <li>Registro digital de solicitudes de soporte.</li>
+          <li>Código único de atención por ticket.</li>
+          <li>Clasificación por tipo de servicio y prioridad.</li>
+          <li>Panel de control con métricas operativas.</li>
+          <li>Seguimiento de niveles de servicio y protección de la información.</li>
+        </ul>
+      </div>
+      <div class="architecture-card">
+        <h3>Flujo de atención</h3>
+        <div class="arch-line"><span>1. Registro</span><b>→</b><span>Solicitud recibida</span></div>
+        <div class="arch-line"><span>2. Evaluación</span><b>→</b><span>Prioridad asignada</span></div>
+        <div class="arch-line"><span>3. Asignación</span><b>→</b><span>Especialista técnico</span></div>
+        <div class="arch-line"><span>4. Atención</span><b>→</b><span>Seguimiento del caso</span></div>
+        <div class="arch-line"><span>5. Cierre</span><b>→</b><span>Solicitud resuelta</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title compact">
+        <span class="eyebrow">Niveles de servicio</span>
+        <h2>Priorización por impacto operativo</h2>
+      </div>
+      <div class="cards four">
+        <article class="sla critical"><strong>Crítica</strong><span>Respuesta: 30 min</span><small>Solución objetivo: 4 h</small></article>
+        <article class="sla high"><strong>Alta</strong><span>Respuesta: 1 h</span><small>Solución objetivo: 8 h</small></article>
+        <article class="sla medium"><strong>Media</strong><span>Respuesta: 4 h</span><small>Solución objetivo: 24 h</small></article>
+        <article class="sla low"><strong>Baja</strong><span>Respuesta: 8 h</span><small>Solución objetivo: 48 h</small></article>
+      </div>
+    </section>
+
+    <section id="ticket" class="section form-section">
+      <div class="section-title">
+        <span class="eyebrow">Crear solicitud</span>
+        <h2>Registra un nuevo ticket de soporte</h2>
+        <p>Inicia sesión y completa los datos del incidente para que nuestro equipo pueda clasificarlo y atenderlo.</p>
+      </div>
+      <form id="ticketForm" class="form-card">
+        <div class="form-grid">
+          <label>Nombre del solicitante<input name="nombre" type="text" placeholder="Ej. Juan Pérez" required /></label>
+          <label>Empresa / Cliente<input name="empresa" type="text" placeholder="Ej. Empresa del solicitante" required /></label>
+          <label>Correo electrónico<input name="correo" type="email" placeholder="cliente@empresa.pe" required /></label>
+          <label>Teléfono<input name="telefono" type="tel" placeholder="+51 999 999 999" required /></label>
+          <label>Tipo de servicio
+            <select name="servicio" required>
+              <option value="">Seleccionar servicio</option>
+              <option>Videovigilancia / CCTV</option>
+              <option>Redes y conectividad</option>
+              <option>Centro de datos</option>
+              <option>Ciberseguridad / SOC</option>
+              <option>Infraestructura TIC</option>
+              <option>Otro servicio</option>
+            </select>
+          </label>
+          <label>Prioridad
+            <select name="prioridad" required>
+              <option value="">Seleccionar prioridad</option>
+              <option>Crítica</option>
+              <option>Alta</option>
+              <option>Media</option>
+              <option>Baja</option>
+            </select>
+          </label>
+        </div>
+        <label>Descripción del problema<textarea name="descripcion" rows="5" placeholder="Describe el incidente, ubicación, equipo afectado y detalle del problema." required></textarea></label>
+        <button class="btn primary full" type="submit">Generar ticket</button>
+        <div id="ticketResult" class="result-box" role="status"></div>
+      </form>
+    </section>
+
+    <section id="consulta" class="section split alt">
+      <div>
+        <span class="eyebrow">Seguimiento</span>
+        <h2>Consulta el estado de un ticket</h2>
+        <p>Ingresa el código generado para visualizar la prioridad, estado y datos principales del caso.</p>
+        <form id="searchForm" class="search-box">
+          <input name="ticketId" type="text" placeholder="Ej. TSC-2026-0001" required />
+          <button class="btn secondary" type="submit">Consultar</button>
+        </form>
+        <div id="searchResult" class="result-box"></div>
+      </div>
+      <div class="security-card">
+        <h3>Seguridad del servicio</h3>
+        <p>Protegemos la información del servicio mediante controles de acceso y monitoreo continuo.</p>
+        <div class="security-grid">
+          <span>Acceso seguro</span><span>Doble factor</span><span>Cifrado</span><span>Monitoreo</span><span>HTTPS</span><span>Respaldos</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section final-cta">
+      <h2>Soporte técnico con control de principio a fin</h2>
+      <p>
+        Registra tu solicitud y recibe atención especializada con seguimiento claro durante todo el proceso.
+      </p>
+      <a class="btn primary" href="#ticket">Registrar una solicitud</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong>Tactical Support Cloud</strong> · Plataforma de atención y seguimiento técnico</p>
+    <p>Atención centralizada, seguimiento transparente y soporte especializado para nuestros clientes.</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

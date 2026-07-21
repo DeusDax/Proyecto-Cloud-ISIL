@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso | Tactical Support Cloud</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Tactical IT">
+      <img class="brand-logo" src="assets/tactical-logo.png" alt="Tactical IT — Tecnología que transforma" />
+    </a>
+    <nav class="nav"><a href="/">Volver al portal</a></nav>
+  </header>
+  <main class="auth-page">
+    <section class="auth-intro">
+      <span class="eyebrow">Área segura</span>
+      <h1>Accede a tu cuenta</h1>
+      <p>Inicia sesión para ingresar al área correspondiente o crea una cuenta de usuario.</p>
+    </section>
+    <section class="auth-grid">
+      <form id="loginForm" class="form-card auth-card">
+        <h2>Iniciar sesión</h2>
+        <label>Usuario<input name="username" autocomplete="username" required /></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="btn primary full" type="submit">Ingresar</button>
+        <div id="loginResult" class="result-box" role="status"></div>
+      </form>
+      <form id="registerForm" class="form-card auth-card">
+        <h2>Crear cuenta</h2>
+        <label>Nombre completo<input name="nombre" autocomplete="name" minlength="2" required /></label>
+        <label>Nombre de usuario<input name="username" autocomplete="username" minlength="3" maxlength="30" required /></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="new-password" minlength="8" required /></label>
+        <button class="btn secondary full" type="submit">Registrarme</button>
+        <div id="registerResult" class="result-box" role="status"></div>
+      </form>
+    </section>
+  </main>
+  <script src="js/auth.js"></script>
+</body>
+</html>

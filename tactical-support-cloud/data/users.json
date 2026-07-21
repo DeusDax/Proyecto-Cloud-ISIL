@@ -1,0 +1,18 @@
+[
+  {
+    "id": "4e75048c-b4b2-4562-9b43-9e5a31993cf7",
+    "nombre": "Administrador",
+    "username": "admin",
+    "passwordHash": "13eda49f48b61ab10237112b9ce0f7c2:88ace26fcbcb91006a639feae8344a3ca1d716635c4290a7718f0a93d086bdb494d48098ca8b7efb79ec002acfebe4d5279f1f732e60913281c61b445724b4f8",
+    "role": "admin",
+    "createdAt": "2026-07-21T04:54:54.421Z"
+  },
+  {
+    "id": "5b70bd50-4db6-4f07-b0ef-381154d81607",
+    "nombre": "Municipalidad de Lima",
+    "username": "munilima2026",
+    "passwordHash": "d51aa05586f0c4fd6e5b8f99ec0c9c13:d571eaf0a03d53199805100fb2684ebb2d6db071448046fec709c0e3bf8bca5e286ad2d056ddb47fab52e899628002169d9bc56460afebcd126ee21dbba26b23",
+    "role": "user",
+    "createdAt": "2026-07-21T05:11:32.499Z"
+  }
+]

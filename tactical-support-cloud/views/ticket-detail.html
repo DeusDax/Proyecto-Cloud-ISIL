@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalle del ticket | Tactical Support Cloud</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/admin" aria-label="Tactical IT"><img class="brand-logo" src="/assets/tactical-logo.png" alt="Tactical IT — Tecnología que transforma" /></a>
+    <div class="admin-actions"><a href="/admin">Volver al panel</a><button id="logoutButton" class="btn secondary" type="button">Cerrar sesión</button></div>
+  </header>
+  <main>
+    <section class="section ticket-detail-section">
+      <div class="detail-heading">
+        <div>
+          <span class="eyebrow">Detalle de solicitud</span>
+          <h1 id="ticketTitle">Cargando ticket...</h1>
+          <p id="ticketDate"></p>
+        </div>
+        <span id="ticketStatus" class="detail-status"></span>
+      </div>
+      <div id="ticketDetail" class="detail-grid" aria-live="polite"></div>
+      <div class="detail-management form-card">
+        <div>
+          <h2>Gestión del caso</h2>
+          <p>Actualiza el estado según el avance de la atención.</p>
+        </div>
+        <div class="detail-update">
+          <select id="detailStatus" aria-label="Estado del ticket"></select>
+          <button id="saveStatus" class="btn primary" type="button">Guardar estado</button>
+        </div>
+        <div id="detailResult" class="result-box" role="status"></div>
+      </div>
+      <div class="ticket-updates form-card">
+        <div>
+          <h2>Bitácora de avances</h2>
+          <p>Registra diagnósticos, acciones realizadas, coordinaciones o cualquier progreso del caso.</p>
+        </div>
+        <label>Nuevo avance<textarea id="updateNote" rows="5" maxlength="2000" placeholder="Ej. Se validó la conectividad del equipo y se coordinó una visita técnica..." required></textarea></label>
+        <div class="update-submit"><small id="noteCounter">0 / 2000</small><button id="saveUpdate" class="btn primary" type="button">Agregar avance</button></div>
+        <div id="updateResult" class="result-box" role="status"></div>
+        <div id="updateHistory" class="update-history"></div>
+      </div>
+    </section>
+  </main>
+  <script src="/js/ticket-detail.js"></script>
+</body>
+</html>

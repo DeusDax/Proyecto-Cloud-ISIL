@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel administrativo | Tactical Support Cloud</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/admin" aria-label="Tactical IT">
+      <img class="brand-logo" src="/assets/tactical-logo.png" alt="Tactical IT — Tecnología que transforma" />
+    </a>
+    <div class="admin-actions"><span id="adminName"></span><a href="/">Portal público</a><button id="logoutButton" class="btn secondary" type="button">Cerrar sesión</button></div>
+  </header>
+  <main>
+    <section class="section dashboard-section">
+      <div class="section-title">
+        <span class="eyebrow">Área administrativa</span>
+        <h1>Control operativo de solicitudes</h1>
+        <p>Supervisa la carga operativa, las prioridades y el avance de todas las solicitudes.</p>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dashboard-card"><span>Total tickets</span><strong id="totalTickets">0</strong></div>
+        <div class="dashboard-card"><span>Pendientes</span><strong id="pendingTickets">0</strong></div>
+        <div class="dashboard-card"><span>En proceso</span><strong id="progressTickets">0</strong></div>
+        <div class="dashboard-card"><span>Cerrados</span><strong id="closedTickets">0</strong></div>
+      </div>
+      <div class="advanced-metrics">
+        <article class="metric-highlight"><span>Casos atendidos</span><strong id="resolvedCases">0</strong><small>Atendidos y cerrados</small></article>
+        <article class="metric-highlight"><span>Tasa de resolución</span><strong id="resolutionRate">0%</strong><small>Sobre el total registrado</small></article>
+        <article class="metric-highlight"><span>Tiempo promedio</span><strong id="averageResolution">—</strong><small>Desde registro hasta solución</small></article>
+        <article class="metric-highlight"><span>Cumplimiento SLA</span><strong id="slaCompliance">—</strong><small>Casos resueltos dentro del objetivo</small></article>
+      </div>
+      <div class="charts-grid">
+        <article class="chart-card">
+          <div class="chart-heading"><div><span>Distribución operativa</span><h3>Tickets por estado</h3></div><strong id="openCases">0 abiertos</strong></div>
+          <div id="statusChart" class="bar-chart"></div>
+        </article>
+        <article class="chart-card">
+          <div class="chart-heading"><div><span>Nivel de impacto</span><h3>Tickets por prioridad</h3></div></div>
+          <div class="donut-layout"><div id="priorityDonut" class="donut-chart"><strong id="priorityTotal">0</strong><span>tickets</span></div><div id="priorityLegend" class="chart-legend"></div></div>
+        </article>
+        <article class="chart-card wide-chart">
+          <div class="chart-heading"><div><span>Demanda de soporte</span><h3>Servicios con más solicitudes</h3></div></div>
+          <div id="serviceChart" class="horizontal-chart"></div>
+        </article>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Código</th><th>Cliente</th><th>Servicio</th><th>Prioridad</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody id="ticketTable"></tbody>
+        </table>
+      </div>
+      <div id="adminResult" class="result-box" role="status"></div>
+    </section>
+    <section class="section users-section">
+      <div class="section-title">
+        <span class="eyebrow">Gestión de accesos</span>
+        <h2>Usuarios registrados</h2>
+        <p>Consulta y actualiza los datos, permisos o contraseña de las cuentas registradas.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="users-table">
+          <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Registro</th><th>Nueva contraseña</th><th>Acción</th></tr></thead>
+          <tbody id="userTable"></tbody>
+        </table>
+      </div>
+      <div id="userResult" class="result-box" role="status"></div>
+    </section>
+  </main>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

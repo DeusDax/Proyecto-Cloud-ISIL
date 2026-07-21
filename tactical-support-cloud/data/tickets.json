@@ -1,0 +1,26 @@
+[
+  {
+    "id": "TSC-2026-0001",
+    "nombre": "Carlos Mendoza",
+    "empresa": "Municipalidad Provincial",
+    "correo": "soporte@municipalidad.pe",
+    "telefono": "+51 999 999 999",
+    "servicio": "Videovigilancia / CCTV",
+    "prioridad": "Alta",
+    "descripcion": "Cámara principal sin visualización desde el centro de monitoreo.",
+    "estado": "En proceso",
+    "fecha": "2026-07-20T15:30:00.000Z"
+  },
+  {
+    "id": "TSC-2026-0002",
+    "nombre": "Operador NOC",
+    "empresa": "Corporación Retail",
+    "correo": "operaciones@corporacionretail.pe",
+    "telefono": "+51 988 888 888",
+    "servicio": "Redes y conectividad",
+    "prioridad": "Media",
+    "descripcion": "Intermitencia en enlace secundario de comunicaciones.",
+    "estado": "Pendiente",
+    "fecha": "2026-07-20T16:10:00.000Z"
+  }
+]

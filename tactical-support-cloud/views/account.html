@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi cuenta | Tactical Support Cloud</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Tactical IT"><img class="brand-logo" src="/assets/tactical-logo.png" alt="Tactical IT — Tecnología que transforma" /></a>
+    <div class="admin-actions"><span id="userName"></span><a href="/#ticket">Crear ticket</a><a href="/">Portal público</a><button id="logoutButton" class="btn secondary" type="button">Cerrar sesión</button></div>
+  </header>
+  <main>
+    <section class="section dashboard-section">
+      <div class="section-title">
+        <span class="eyebrow">Área de cliente</span>
+        <h1>Mis tickets</h1>
+        <p>Consulta las solicitudes asociadas a tu cuenta y revisa su estado actual.</p>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dashboard-card"><span>Total</span><strong id="totalTickets">0</strong></div>
+        <div class="dashboard-card"><span>Pendientes</span><strong id="pendingTickets">0</strong></div>
+        <div class="dashboard-card"><span>En atención</span><strong id="progressTickets">0</strong></div>
+        <div class="dashboard-card"><span>Finalizados</span><strong id="closedTickets">0</strong></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Código</th><th>Servicio</th><th>Prioridad</th><th>Estado</th><th>Fecha</th><th>Descripción</th></tr></thead>
+          <tbody id="userTicketTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="/js/account.js"></script>
+</body>
+</html>
