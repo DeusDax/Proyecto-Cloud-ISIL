@@ -102,7 +102,7 @@ Al crear el stack se solicitan:
 
 - `KeyName`: par de claves de EC2.
 - `AdminCidr`: IP pública administrativa con `/32`, por ejemplo `203.0.113.10/32`.
-- `InstanceType`: `t3.micro` por defecto.
+- `InstanceType`: `t3.micro` por defecto en Virginia (`us-east-1`).
 - `RepositoryUrl`: repositorio público desde el que se descarga la aplicación.
 
 El Security Group publica únicamente HTTP en el puerto 80 y restringe SSH a `AdminCidr`. El puerto 3000 no se expone a Internet. El proceso se reinicia automáticamente mediante `systemd` y los registros de instalación quedan en `/var/log/tactical-install.log`.

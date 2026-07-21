@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Tactical Support Cloud en EC2 con Node.js, NGINX y systemd
+Description: Tactical Support Cloud en Virginia con EC2, S3, IAM y CloudWatch
 
 Parameters:
   KeyName:
@@ -27,10 +27,67 @@ Parameters:
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
 
 Resources:
+  TacticalVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.40.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: tactical-support-vpc
+
+  TacticalInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: tactical-support-igw
+
+  TacticalGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref TacticalVpc
+      InternetGatewayId: !Ref TacticalInternetGateway
+
+  TacticalPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref TacticalVpc
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: 10.40.10.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: tactical-support-virginia-public
+
+  TacticalRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref TacticalVpc
+      Tags:
+        - Key: Name
+          Value: tactical-support-public-rt
+
+  TacticalDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: TacticalGatewayAttachment
+    Properties:
+      RouteTableId: !Ref TacticalRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref TacticalInternetGateway
+
+  TacticalSubnetRouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref TacticalPublicSubnet
+      RouteTableId: !Ref TacticalRouteTable
+
   TacticalSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: HTTP publico y SSH limitado al administrador
+      VpcId: !Ref TacticalVpc
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -44,14 +101,96 @@ Resources:
         - Key: Name
           Value: tactical-support-sg
 
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: RetenerBackups90Dias
+            Status: Enabled
+            Prefix: backups/
+            ExpirationInDays: 90
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+      Tags:
+        - Key: Project
+          Value: Proyecto Cloud ISIL
+
+  TacticalLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /tactical-support-cloud/application
+      RetentionInDays: 14
+
+  TacticalInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: TacticalS3BackupAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt BackupBucket.Arn
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub '${BackupBucket.Arn}/backups/*'
+      Tags:
+        - Key: Project
+          Value: Proyecto Cloud ISIL
+
+  TacticalInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref TacticalInstanceRole
+
   TacticalInstance:
     Type: AWS::EC2::Instance
+    DependsOn:
+      - TacticalDefaultRoute
     Properties:
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyName
+      SubnetId: !Ref TacticalPublicSubnet
       SecurityGroupIds:
-        - !GetAtt TacticalSecurityGroup.GroupId
+        - !Ref TacticalSecurityGroup
+      IamInstanceProfile: !Ref TacticalInstanceProfile
+      MetadataOptions:
+        HttpTokens: required
+        HttpEndpoint: enabled
+      CreditSpecification:
+        CPUCredits: standard
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -66,7 +205,7 @@ Resources:
           exec > >(tee /var/log/tactical-install.log | logger -t user-data -s 2>/dev/console) 2>&1
 
           dnf update -y
-          dnf install -y git nginx nodejs22 nodejs22-npm
+          dnf install -y git nginx nodejs22 nodejs22-npm amazon-cloudwatch-agent
           alternatives --set node /usr/bin/node-22
           alternatives --set npm /usr/bin/npm-22
 
@@ -75,6 +214,8 @@ Resources:
           cd /opt/proyecto-cloud-isil/tactical-support-cloud
           npm ci --omit=dev
           chown -R ec2-user:ec2-user /opt/proyecto-cloud-isil
+          touch /var/log/tactical-app.log
+          chown ec2-user:ec2-user /var/log/tactical-app.log
 
           cat > /etc/systemd/system/tactical-support-cloud.service <<'SERVICE'
           [Unit]
@@ -91,6 +232,8 @@ Resources:
           ExecStart=/usr/bin/node server.js
           Restart=always
           RestartSec=5
+          StandardOutput=append:/var/log/tactical-app.log
+          StandardError=append:/var/log/tactical-app.log
 
           [Install]
           WantedBy=multi-user.target
@@ -128,16 +271,172 @@ Resources:
           }
           NGINX
 
+          cat > /usr/local/bin/tactical-backup.sh <<'BACKUP'
+          #!/bin/bash
+          set -euo pipefail
+          TIMESTAMP=$(date -u +%Y/%m/%d/%H%M%S)
+          DATA_DIR=/opt/proyecto-cloud-isil/tactical-support-cloud/data
+          aws s3 cp "$DATA_DIR/tickets.json" "s3://${BackupBucket}/backups/$TIMESTAMP/tickets.json" --sse AES256
+          aws s3 cp "$DATA_DIR/users.json" "s3://${BackupBucket}/backups/$TIMESTAMP/users.json" --sse AES256
+          BACKUP
+          chmod 750 /usr/local/bin/tactical-backup.sh
+
+          cat > /etc/systemd/system/tactical-backup.service <<'BACKUPSERVICE'
+          [Unit]
+          Description=Backup de Tactical Support Cloud hacia S3
+          After=network-online.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/tactical-backup.sh
+          BACKUPSERVICE
+
+          cat > /etc/systemd/system/tactical-backup.timer <<'BACKUPTIMER'
+          [Unit]
+          Description=Backup diario de Tactical Support Cloud
+
+          [Timer]
+          OnCalendar=*-*-* 02:00:00 UTC
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+          BACKUPTIMER
+
+          cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'CWCONFIG'
+          {
+            "agent": { "metrics_collection_interval": 60, "run_as_user": "root" },
+            "metrics": {
+              "namespace": "TacticalSupportCloud",
+              "append_dimensions": { "InstanceId": "${!aws:InstanceId}" },
+              "aggregation_dimensions": [["InstanceId"]],
+              "metrics_collected": {
+                "mem": { "measurement": ["mem_used_percent"] },
+                "disk": { "measurement": ["used_percent"], "resources": ["/"] }
+              }
+            },
+            "logs": {
+              "logs_collected": {
+                "files": {
+                  "collect_list": [
+                    { "file_path": "/var/log/tactical-app.log", "log_group_name": "/tactical-support-cloud/application", "log_stream_name": "{instance_id}/app" },
+                    { "file_path": "/var/log/nginx/access.log", "log_group_name": "/tactical-support-cloud/application", "log_stream_name": "{instance_id}/nginx-access" },
+                    { "file_path": "/var/log/nginx/error.log", "log_group_name": "/tactical-support-cloud/application", "log_stream_name": "{instance_id}/nginx-error" },
+                    { "file_path": "/var/log/tactical-install.log", "log_group_name": "/tactical-support-cloud/application", "log_stream_name": "{instance_id}/install" }
+                  ]
+                }
+              }
+            }
+          }
+          CWCONFIG
+
           systemctl daemon-reload
           systemctl enable --now tactical-support-cloud
           nginx -t
           systemctl enable --now nginx
+          systemctl enable --now tactical-backup.timer
+          systemctl start tactical-backup.service
+          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
           curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:3000/api/health
       Tags:
         - Key: Name
-          Value: tactical-support-cloud
+          Value: tactical-support-cloud-virginia
         - Key: Project
           Value: Proyecto Cloud ISIL
+
+  CpuAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: CPU superior a 80 por ciento durante 10 minutos
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref TacticalInstance
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  StatusCheckAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Fallo en las comprobaciones de estado de EC2
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref TacticalInstance
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+  MemoryAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Memoria utilizada por encima de 85 por ciento
+      Namespace: TacticalSupportCloud
+      MetricName: mem_used_percent
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref TacticalInstance
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 85
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  DiskAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Disco utilizado por encima de 80 por ciento
+      Namespace: TacticalSupportCloud
+      MetricName: disk_used_percent
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref TacticalInstance
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  TacticalDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: Tactical-Support-Cloud
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric", "x": 0, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "EC2 - CPU y estado", "region": "${AWS::Region}", "view": "timeSeries",
+                "metrics": [
+                  ["AWS/EC2", "CPUUtilization", "InstanceId", "${TacticalInstance}"],
+                  [".", "StatusCheckFailed", ".", "."]
+                ], "period": 300, "stat": "Average"
+              }
+            },
+            {
+              "type": "metric", "x": 12, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "Sistema - Memoria y disco", "region": "${AWS::Region}", "view": "timeSeries",
+                "metrics": [
+                  ["TacticalSupportCloud", "mem_used_percent", "InstanceId", "${TacticalInstance}"],
+                  ["TacticalSupportCloud", "disk_used_percent", "InstanceId", "${TacticalInstance}"]
+                ], "period": 300, "stat": "Average"
+              }
+            }
+          ]
+        }
 
 Outputs:
   InstanceId:
@@ -149,6 +448,15 @@ Outputs:
   WebURL:
     Description: URL publica de Tactical Support Cloud
     Value: !Sub 'http://${TacticalInstance.PublicDnsName}'
+  BackupBucketName:
+    Description: Bucket privado de respaldos
+    Value: !Ref BackupBucket
+  LogGroupName:
+    Description: Grupo de logs de CloudWatch
+    Value: !Ref TacticalLogGroup
+  DashboardName:
+    Description: Dashboard de CloudWatch
+    Value: !Ref TacticalDashboard
   SSHCommand:
     Description: Comando SSH de referencia para Amazon Linux
     Value: !Sub 'ssh -i TU-CLAVE.pem ec2-user@${TacticalInstance.PublicDnsName}'
