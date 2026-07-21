@@ -11,7 +11,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'tickets.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
-const SESSION_COOKIE = 'tsc_session';
+const SESSION_COOKIE = 'tsc_session_v2';
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const sessions = new Map();
 
